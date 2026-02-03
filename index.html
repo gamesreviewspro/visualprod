@@ -1,0 +1,678 @@
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurateur Roulette Subway Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --bg: #f8f9fa; --black: #000000; --white: #ffffff; --yellow-border: #FFD700; --bulb-color: #FFD700; --bulb-size: 8px; --border-width: 13px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
+        .main-wrapper { display: flex; flex-direction: column; gap: 20px; max-width: 1400px; margin: auto; padding: 10px; }
+        
+        /* Modification pour Config à gauche, Preview à droite */
+        @media (min-width: 1100px) { 
+            .main-wrapper { flex-direction: row; align-items: flex-start; } 
+            .panel-config { order: 1; flex: 1.2; min-width: 550px; } 
+            .panel-preview { order: 2; flex: 2; } 
+        }
+
+        .panel { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: 1.3em; margin-top: 0; }
+        .brand-colors { display: flex; gap: 20px; background: #f1f3f5; padding: 15px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: center; }
+        .color-input-group { text-align: center; }
+        .color-input-group input[type="color"] { width: 50px; height: 50px; border: none; border-radius: 50%; cursor: pointer; background: none; padding: 0; }
+        .color-input-group div { font-size: 10px; margin-top: 5px; font-weight: bold; color: #666; }
+        .row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+        input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+        
+        .ln { flex: 2; height: 40px; min-width: 0; } 
+        .lp { width: 70px; text-align: center; font-weight: bold; } 
+        .ls { width: 70px; text-align: center; } 
+        .lc { width: 45px; height: 40px; padding: 0; border: none; background: none; cursor: pointer; flex-shrink: 0; }
+        
+        .labels-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 0.70em; font-weight: bold; color: #888; padding-right: 35px; text-align: center; }
+        .labels-row div { display: flex; align-items: center; justify-content: center; }
+
+        .full-width { width: 100%; box-sizing: border-box; margin-bottom: 12px; display: block; }
+        label { font-weight: bold; font-size: 0.85em; color: #666; display: block; margin-bottom: 5px; }
+        .btn-black { background: var(--black) !important; color: white !important; border: none; padding: 15px 25px; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-add-container { text-align: right; margin: 10px 0 20px 0; }
+        .btn-add { background: var(--black); color: white; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
+        .screen-mockup { border: 12px solid #222; border-radius: 35px; padding: 15px; background: #FAF9F6; min-height: 520px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; max-width: 280px; margin: auto; }
+        .screen-mockup::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 18px; background: #222; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; z-index: 11; }
+        .screen-label { font-size: 0.70em; font-weight: bold; color: #fff; background: #333; padding: 3px 10px; border-radius: 10px; margin-bottom: 15px; display: inline-block; position: relative; z-index: 12; }
+        
+        .wheel-container, .wheel-box { 
+            position: relative; 
+            margin: 20px auto; 
+            border: var(--border-width) solid var(--yellow-border); 
+            border-radius: 50%; 
+            box-shadow: 0 0 15px var(--yellow-border);
+            animation: lights 1.5s infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .wheel-container { width: 220px; height: 220px; }
+        .wheel-box { width: 300px; height: 300px; }
+
+        .bulb {
+            position: absolute;
+            width: var(--bulb-size);
+            height: var(--bulb-size);
+            background: white;
+            border-radius: 50%;
+            z-index: 15;
+            box-shadow: 0 0 5px white;
+            animation: bulb-flash 0.6s infinite alternate;
+        }
+
+        @keyframes bulb-flash {
+            from { background: #fff; box-shadow: 0 0 2px #fff; }
+            to { background: var(--bulb-color); box-shadow: 0 0 10px var(--bulb-color); }
+        }
+
+        @keyframes lights {
+            from { box-shadow: 0 0 10px var(--yellow-border), inset 0 0 5px var(--yellow-border); }
+            to { box-shadow: 0 0 25px var(--yellow-border), inset 0 0 15px var(--yellow-border); border-color: #fff700; }
+        }
+
+        #canvas-preview, #rc { transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); border-radius: 50%; display: block; }
+        
+        .pointer, .client-pointer { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 25px; height: 25px; background: var(--white); clip-path: polygon(100% 0, 0 0, 50% 100%); z-index: 20; display: flex; align-items: flex-start; justify-content: center; }
+        .pointer::after, .client-pointer::after { content: ""; width: 18px; height: 18px; background: var(--black); clip-path: polygon(100% 0, 0 0, 50% 100%); margin-top: 2px; }
+        
+        .logo-center-preview { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #fff; object-fit: contain; z-index: 5; pointer-events: none; }
+        #qr-display { display:none; margin-top: 20px; text-align: center; background: #fff; padding: 25px; border: 2px dashed #000; border-radius: 15px; }
+        #qrcode-area { padding: 20px; background: white; display: inline-block; text-align: center; }
+        #qrcode { display: flex; justify-content: center; margin: 10px 0; padding: 10px; border: 2px solid #000; display: inline-block; }
+        .qr-actions { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .btn-download { padding: 10px 20px; border-radius: 50px; cursor: pointer; font-size: 13px; font-weight: bold; border: 1px solid #000; background: white; }
+        .gain-box { margin-top:20px; border: 2px solid #000; padding: 15px; border-radius: 15px; background: #fff; }
+        .upload-wrapper { margin-bottom: 15px; padding: 15px; border: 2px dashed #ccc; border-radius: 12px; text-align: center; background: #fafafa; }
+        #upload-status { font-size: 12px; margin-top: 8px; font-weight: bold; }
+        .mock-form input { width: 100%; margin-bottom: 8px; padding: 8px; font-size: 12px; border: 1px solid #ccc; border-radius: 5px; }
+        
+        .config-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .config-item { flex: 1; }
+
+        /* Style pour l'élément grisé Premium supprimé */
+    </style>
+
+<div class="main-wrapper">
+    <div class="panel panel-config">
+        <h2>⚙️ Configuration de votre jeu </h2>
+        
+        <label>Uploader votre logo depuis vos fichiers :</label>
+        <div class="upload-wrapper">
+            <input type="file" id="logo_file_input" accept="image/*" onchange="uploadLogoDirect(this)">
+            <div id="upload-status">Formats acceptés : PNG, JPG, WEBP</div>
+        </div>
+
+        <label>ou indiquer l’URL du logo si il est en ligne :</label>
+        <input type="text" id="logo_url" class="full-width" oninput="update()" value="https://drscbjrshjhupvrrzqec.supabase.co/storage/v1/object/public/logos/1770049092342-yourlogo.png">
+
+        <label>URL de destination de votre choix où le client devra faire une action (avis Google / page Facebook, Instagram, Tiktok) :</label>
+        <input type="text" id="google_url" class="full-width" value="https://g.page/r/CdoMazxHMNgaEBM/review" oninput="update()">
+
+        <label>Code couleur de votre marque :</label>
+        <div class="brand-colors">
+            <div class="color-input-group">
+                <input type="color" id="color1" value="#000000" oninput="updateAllLotsColors(this.value, 'bg')">
+                <div>COULEUR PAR DÉFAUT 1</div>
+            </div>
+            <div style="font-size: 20px;">🔄</div>
+            <div class="color-input-group">
+                <input type="color" id="color2" value="#311873" oninput="updateAllLotsColors(this.value, 'bg')">
+                <div>COULEUR PAR DÉFAUT 2</div>
+            </div>
+        </div>
+        
+        <label>Textes à personnaliser :</label>
+        <input type="text" id="t1" class="full-width" value="Cadeaux à gagner ! ✨" oninput="update()">
+        <input type="text" id="t2" class="full-width" value="Laissez un avis pour débloquer la roue. Voir conditions* dans votre point de vente." oninput="update()">
+        <input type="text" id="t3" class="full-width" value="Laisser un avis" oninput="update()">
+        <input type="text" id="t_wheel" class="full-width" value="Tournez la roue et tentez de gagner* de nombreux cadeaux !" oninput="update()">
+        
+        <label>Personnalisez les conditions de participation (s'affiche au résultat) :</label>
+        <textarea id="t_cond" class="full-width" rows="6" oninput="update()">Si vous avez gagné, présenter cet écran à l’accueil. Le jeu est ouvert à toute personne physique majeure, sans obligation d’achat. La participation est strictement limitée à un seul lancer par personne. Les gains obtenus doivent être réclamés ou consommés immédiatement et ne peuvent être reportés à une date ultérieure en fonction des conditions. Les lots gagnés ne sont pas cumulables avec d'autres offres promotionnelles, réductions en cours dans l'établissement. Les lots sont proposés dans la limite des stocks disponibles. Les gains ne sont ni échangeables, ni remboursables en espèces. Vos données sont traitées pour la gestion du jeu.</textarea>
+
+        <label>Design de la roue du jeu (bordure et lumières) :</label>
+        <div class="brand-colors" style="flex-wrap: wrap;">
+            <div class="color-input-group">
+                <input type="color" id="wheel_border_color" value="#311873" oninput="update()">
+                <div>COULEUR BORDURE</div>
+            </div>
+            <div class="color-input-group">
+                <input type="color" id="wheel_bulb_color" value="#FFD700" oninput="update()">
+                <div>COULEUR LUMIÈRES</div>
+            </div>
+            <div class="color-input-group">
+                <input type="number" id="wheel_bulb_size" value="16" min="2" max="20" oninput="update()" style="width: 50px; padding: 5px;">
+                <div>TAILLE LUMIÈRES (px)</div>
+            </div>
+        </div>
+
+        <div class="labels-row">
+            <div class="ln" style="justify-content: flex-start;">LOT (2 lignes auto)</div>
+            <div class="lp">PROB. %</div>
+            <div class="ls">TAILLE</div>
+            <div style="width:45px">FOND</div>
+            <div style="width:45px">TEXTE</div>
+        </div>
+        <div id="lots-inputs"></div>
+        <div class="btn-add-container">
+            <button class="btn-add" onclick="addLotRow('', 0, 12, '#000000', '#ffffff')"><span>+</span> rajouter un lot</button>
+        </div>
+        
+        <button id="btn-gen" class="btn-black" style="width:100%" onclick="saveAndGenerate()">Générer le QR Code</button>
+        
+        <div id="qr-display">
+            <div id="qrcode-area">
+                <img id="qr-logo-top" src="" style="max-width: 150px; max-height: 80px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;" loading="lazy">
+                <h3 id="qr-title" style="margin: 0; font-size: 22px; color: #000; font-weight: bold;">Cadeau à gagner ! ✨</h3>
+                <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #333;">Scannez-moi</p>
+                <div id="qrcode"></div>
+                <p id="qr-id-display" style="font-family: monospace; font-weight: bold; margin-top: 5px; color: #555;"></p>
+            </div>
+            <div class="qr-actions">
+                <button class="btn-download" onclick="downloadQR('png')">Télécharger PNG et imprimer</button>
+                <button class="btn-download" onclick="downloadQR('pdf')">Télécharger PDF et imprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-preview">
+        <h2>👁️ Aperçu du parcours de votre client</h2>
+        <div class="preview-grid">
+            <div class="screen-mockup">
+                <span class="screen-label">Étape 1 : Avis</span>
+                <div style="margin-top:40px;">
+                    <img id="pre-logo-pop" src="" style="max-width: 100px; margin-bottom: 15px;" loading="lazy">
+                    <div style="background:white; padding:15px; border-radius:15px; border:1px solid #eee;">
+                        <h4 id="pre-t1" style="margin:0 0 10px 0; font-size: 14px;"></h4>
+                        <p id="pre-t2" style="font-size:10px; color:#666;"></p>
+                        <div class="btn-black" id="pre-t3" style="font-size:10px; padding:8px 15px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screen-mockup">
+                <span class="screen-label">Étape 2 : Formulaire</span>
+                <div style="margin-top:30px; text-align: left; padding: 0 10px;">
+                    <h5 style="margin: 0 0 10px 0; text-align: center;">Dernière étape !</h5>
+                    <div class="mock-form">
+                        <input type="text" placeholder="Nom complet" disabled="">
+                        <input type="text" placeholder="Email" disabled="">
+                        <input type="text" placeholder="Téléphone" disabled="">
+                        <div style="font-size: 9px; display: flex; gap: 5px; align-items: flex-start; margin-top: 10px;">
+                            <input type="checkbox" checked="" style="width: auto;">
+                            <span>J'accepte que mes données soient collectées pour être recontacté si je gagne. J'accepte le règlement du jeu et l'utilisation de mes données pour ma participation. J'accepte également de recevoir des offres promotionnelles de l'établissement par email et téléphone.</span>
+                        </div>
+                        <div class="btn-black" style="font-size:10px; padding:10px; width: 100%; margin-top: 15px;">VALIDER ET JOUER</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screen-mockup">
+                <span class="screen-label">Étape 3 : Jeu</span>
+                <h4 id="pre-twheel" style="margin: 10px 0; font-size: 14px;"></h4>
+                <div class="wheel-container" id="preview-bulbs-container">
+                    <div class="pointer"></div>
+                    <img id="pre-logo-wheel" src="" class="logo-center-preview" loading="lazy">
+                    <canvas id="canvas-preview" width="200" height="200"></canvas>
+                </div>
+                <div class="btn-black" id="btn-spin-preview" onclick="spinPreview()" style="font-size:10px; padding:10px 20px; width:150px;">LANCEZ LA ROUE</div>
+            </div>
+
+            <div class="screen-mockup">
+                <span class="screen-label">Étape 4 : Résultat</span>
+                <div class="gain-box" style="margin-top:30px;">
+                    <img id="pre-logo-gain" src="" style="max-width: 50px; margin-bottom: 10px;" loading="lazy">
+                    <h4 style="margin:0; font-size: 13px;">Merci pour votre participation ! 🎉</h4>
+                    <p style="font-size:12px; font-weight:bold; margin:10px 0;">Résultat : <span id="preview-win-txt">Cookie 🍪</span></p>
+                    <p id="pre-cond" style="color:black; font-size:8px; border-top:1px solid #eee; padding-top:10px; margin-top:10px; text-align:justify; line-height:1.2;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SB_URL = "https://drscbjrshjhupvrrzqec.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyc2NianJzaGpodXB2cnJ6cWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NDM2NDUsImV4cCI6MjA4NTExOTY0NX0.t15POxBSoA0bmQ0WXEBN0sClGRtvxc1JKYGeaY65Y7g";
+
+    function generateUID() {
+        return Math.random().toString(36).substring(2, 9).toUpperCase();
+    }
+
+    function createBulbs(containerId, count) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        const bulbs = container.querySelectorAll('.bulb');
+        bulbs.forEach(b => b.remove());
+        
+        for (let i = 0; i < count; i++) {
+            const bulb = document.createElement('div');
+            bulb.className = 'bulb';
+            const angle = (i / count) * (Math.PI * 2);
+            const x = 50 + 52 * Math.cos(angle);
+            const y = 50 + 52 * Math.sin(angle);
+            bulb.style.left = `${x}%`;
+            bulb.style.top = `${y}%`;
+            bulb.style.transform = 'translate(-50%, -50%)';
+            bulb.style.animationDelay = `${(i % 2) * 0.3}s`;
+            container.appendChild(bulb);
+        }
+    }
+
+    async function uploadLogoDirect(input) {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        const status = document.getElementById('upload-status');
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        const fileName = `${Date.now()}-${cleanName}`;
+        status.innerText = "⏳ Téléchargement...";
+        status.style.color = "blue";
+        try {
+            const response = await fetch(`${SB_URL}/storage/v1/object/logos/${fileName}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY, 'Content-Type': file.type },
+                body: file
+            });
+            if (response.ok) {
+                const publicUrl = `${SB_URL}/storage/v1/object/public/logos/${fileName}`;
+                document.getElementById('logo_url').value = publicUrl;
+                status.innerText = "✅ Logo envoyé !";
+                status.style.color = "green";
+                update();
+            } else { status.innerText = "❌ Erreur de stockage"; status.style.color = "red"; }
+        } catch (e) { status.innerText = "❌ Erreur réseau"; status.style.color = "red"; }
+    }
+
+    async function saveAndGenerate() {
+        const btn = document.getElementById('btn-gen');
+        btn.innerText = "⏳ Enregistrement...";
+        btn.disabled = true;
+        
+        const configId = generateUID();
+        const inputs = Array.from(document.querySelectorAll('.lot-row'));
+        const configData = {
+            n: inputs.map(i => i.querySelector('.ln').value),
+            p: inputs.map(i => parseInt(i.querySelector('.lp').value) || 0),
+            s: inputs.map(i => parseInt(i.querySelector('.ls').value) || 12),
+            bg: inputs.map(i => i.querySelector('.lbg').value),
+            tx: inputs.map(i => i.querySelector('.ltx').value),
+            u: document.getElementById('google_url').value, 
+            l: document.getElementById('logo_url').value,
+            t1: document.getElementById('t1').value, 
+            t2: document.getElementById('t2').value,
+            t3: document.getElementById('t3').value, 
+            tw: document.getElementById('t_wheel').value,
+            tc: document.getElementById('t_cond').value,
+            b1: document.getElementById('color1').value,
+            b2: document.getElementById('color2').value,
+            wb_c: document.getElementById('wheel_border_color').value,
+            wb_s: "13",
+            wl_c: document.getElementById('wheel_bulb_color').value,
+            wl_s: document.getElementById('wheel_bulb_size').value
+        };
+
+        try {
+            const response = await fetch(`${SB_URL}/rest/v1/roulette_configs`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                body: JSON.stringify({ id: configId, data: configData })
+            });
+            
+            if (!response.ok) throw new Error();
+            
+            const url = window.location.origin + window.location.pathname + "?id=" + configId;
+            document.getElementById('qr-display').style.display = 'block';
+            document.getElementById('qr-id-display').innerText = "ID : " + configId;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: url, width: 220, height: 220, colorDark: "#000000" });
+            
+            btn.innerText = "QR Code prêt à être utilisé et imprimer";
+            btn.disabled = false;
+        } catch (e) {
+            alert("Erreur: Vérifiez la table Supabase.");
+            btn.disabled = false;
+        }
+    }
+
+    const defaultLots = [
+        { n: "-5% DE REMISE", p: 20, s: 16, bg: "#000000", tx: "#ffffff" },
+        { n: "😍​  CARNET", p: 15, s: 16, bg: "#311873", tx: "#ffffff" },
+        { n: "STYLO  ​🎁​", p: 15, s: 16, bg: "#000000", tx: "#ffffff" },
+        { n: " 🫶 UN CAFÉ", p: 20, s: 16, bg: "#311873", tx: "#ffffff" },
+        { n: "UN  T-SHIRT", p: 15, s: 16, bg: "#000000", tx: "#ffffff" },
+        { n: "COOKIE CHOCO", p: 15, s: 16, bg: "#311873", tx: "#ffffff" }
+    ];
+
+    function addLotRow(n, p, s, bg, tx) {
+        const container = document.getElementById('lots-inputs');
+        const div = document.createElement('div');
+        div.className = 'lot-row-wrapper';
+        div.innerHTML = `<div class="row lot-row">
+            <input type="text" class="ln" value="${n}" oninput="update()">
+            <input type="number" class="lp" value="${p}" oninput="update()">
+            <input type="number" class="ls" value="${s}" oninput="update()">
+            <input type="color" class="lc lbg" value="${bg}" oninput="update()">
+            <input type="color" class="lc ltx" value="${tx}" oninput="update()">
+            <button onclick="this.closest('.lot-row-wrapper').remove(); update();" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold; font-size:18px; width:25px;">×</button>
+        </div>`;
+        container.appendChild(div);
+    }
+
+    function updateAllLotsColors(val, type) {
+        const inputs = Array.from(document.querySelectorAll('.lot-row'));
+        inputs.forEach((row, idx) => {
+            if(type === 'bg') {
+                const c1 = document.getElementById('color1').value;
+                const c2 = document.getElementById('color2').value;
+                row.querySelector('.lbg').value = (idx % 2 === 0) ? c1 : c2;
+            }
+        });
+        update();
+    }
+
+    function update() {
+        const logoUrl = document.getElementById('logo_url').value;
+        document.getElementById('pre-logo-pop').src = logoUrl;
+        document.getElementById('pre-logo-wheel').src = logoUrl;
+        document.getElementById('pre-logo-gain').src = logoUrl;
+        document.getElementById('qr-logo-top').src = logoUrl;
+        document.getElementById('pre-t1').innerText = document.getElementById('t1').value;
+        document.getElementById('qr-title').innerText = document.getElementById('t1').value;
+        document.getElementById('pre-t2').innerText = document.getElementById('t2').value;
+        document.getElementById('pre-t3').innerText = document.getElementById('t3').value;
+        document.getElementById('pre-twheel').innerText = document.getElementById('t_wheel').value;
+        document.getElementById('pre-cond').innerText = document.getElementById('t_cond').value;
+        
+        const root = document.documentElement;
+        root.style.setProperty('--yellow-border', document.getElementById('wheel_border_color').value);
+        root.style.setProperty('--border-width', '13px');
+        root.style.setProperty('--bulb-color', document.getElementById('wheel_bulb_color').value);
+        root.style.setProperty('--bulb-size', document.getElementById('wheel_bulb_size').value + 'px');
+
+        const inputs = Array.from(document.querySelectorAll('.lot-row'));
+        const ns = inputs.map(i => i.querySelector('.ln').value);
+        const ps = inputs.map(i => parseInt(i.querySelector('.lp').value) || 0);
+        const ss = inputs.map(i => parseInt(i.querySelector('.ls').value) || 12);
+        const bgs = inputs.map(i => i.querySelector('.lbg').value);
+        const txs = inputs.map(i => i.querySelector('.ltx').value);
+        draw(ns, ps, ss, bgs, txs);
+        createBulbs('preview-bulbs-container', 12);
+    }
+
+    function draw(ns, ps, ss, bgs, txs) {
+        const canvas = document.getElementById('canvas-preview'), ctx = canvas.getContext('2d');
+        const filtered = ns.map((n, i) => n.trim() !== "" ? i : -1).filter(idx => idx !== -1);
+        ctx.clearRect(0,0,200,200);
+        if(filtered.length === 0) return;
+        const centerX = 100, centerY = 100, radius = 100;
+        const arc = (2 * Math.PI) / filtered.length; 
+        filtered.forEach((idx, i) => {
+            ctx.beginPath(); ctx.fillStyle = bgs[idx];
+            ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, radius, i * arc, (i + 1) * arc); ctx.fill();
+            ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(i * arc + arc / 2);
+            ctx.fillStyle = txs[idx]; ctx.font = `bold ${ss[idx]*0.7}px Arial`; ctx.textAlign = "left";
+            
+            const text = ns[idx];
+            if (text.length > 10 && text.includes(' ')) {
+                const mid = Math.floor(text.length / 2);
+                const spaceIdx = text.indexOf(' ', mid) !== -1 ? text.indexOf(' ', mid) : text.lastIndexOf(' ', mid);
+                if (spaceIdx !== -1) {
+                    ctx.fillText(text.substring(0, spaceIdx), 40, -4);
+                    ctx.fillText(text.substring(spaceIdx + 1), 40, 8);
+                } else { ctx.fillText(text, 40, 4); }
+            } else { ctx.fillText(text, 40, 4); }
+            ctx.restore();
+        });
+        ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(centerX, centerY, 25, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function spinPreview() {
+        const btn = document.getElementById('btn-spin-preview');
+        const canvas = document.getElementById('canvas-preview');
+        canvas.style.transform = `rotate(${3600 + Math.random()*360}deg)`;
+        btn.style.pointerEvents = 'none'; btn.style.opacity = '0.5';
+        setTimeout(() => {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            canvas.style.transition = 'none'; canvas.style.transform = 'rotate(0deg)';
+            setTimeout(() => { canvas.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0.1, 1)'; btn.style.pointerEvents = 'auto'; btn.style.opacity = '1'; }, 50);
+        }, 5200);
+    }
+
+    async function downloadQR(format) {
+        const area = document.getElementById('qrcode-area');
+        const canvas = await html2canvas(area, { scale: 3, useCORS: true, backgroundColor: "#ffffff" });
+        if (format === 'png') {
+            const link = document.createElement('a'); link.download = 'roulette.png';
+            link.href = canvas.toDataURL('image/png'); link.click();
+        } else {
+            const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4');
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, 100, 100 * (canvas.height / canvas.width));
+            pdf.save('roulette.pdf');
+        }
+    }
+
+    function renderClient(config, configId) {
+        const bSize = 13;
+        const bColor = config.wb_c || '#FFD700';
+        const lSize = config.wl_s || 10;
+        const lColor = config.wl_c || '#FFD700';
+
+        document.body.innerHTML = `
+        <style>
+            body { background: #f4f4f4; margin: 0; padding: 10px; box-sizing: border-box; }
+            .client-card { background: white; padding: 20px; border-radius: 25px; width: 100%; max-width: 400px; margin: 10px auto; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); box-sizing: border-box; }
+            .btn-black-c { background: #000; color: #fff; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 15px; box-sizing: border-box; }
+            input[type="text"], input[type="email"], input[type="tel"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+            
+            .wheel-box-client { 
+                position: relative; width: 280px; height: 280px; margin: 20px auto; 
+                border: ${bSize}px solid ${bColor}; border-radius: 50%; box-shadow: 0 0 15px ${bColor};
+                animation: lights-client 1.5s infinite alternate;
+                display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+            }
+            @keyframes lights-client { from { box-shadow: 0 0 10px ${bColor}; } to { box-shadow: 0 0 25px ${bColor}; border-color: #fff700; } }
+
+            .bulb-client { position: absolute; width: ${lSize}px; height: ${lSize}px; background: white; border-radius: 50%; z-index: 15; box-shadow: 0 0 5px white; animation: bulb-flash-client 0.6s infinite alternate; }
+            @keyframes bulb-flash-client { from { background: #fff; box-shadow: 0 0 2px #fff; } to { background: ${lColor}; box-shadow: 0 0 10px ${lColor}; } }
+
+            #rc { border-radius: 50%; transition: transform 5s cubic-bezier(0.1,0,0.1,1); display: block; width: 100%; height: 100%; }
+            .client-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; background: #fff; clip-path: polygon(100% 0, 0 0, 50% 100%); z-index: 20; padding: 2px; }
+            .client-pointer::after { content: ""; position: absolute; top: 2px; left: 2px; width: calc(100% - 4px); height: calc(100% - 4px); background: #000; clip-path: polygon(100% 0, 0 0, 50% 100%); }
+        </style>
+
+        <div id="step-avis" class="client-card">
+            <img src="${config.l}" style="max-width:120px; margin-bottom:20px;">
+            <h2>${config.t1}</h2>
+            <p style="color:#666;">${config.t2}</p>
+            <a href="${config.u}" target="_blank" class="btn-black-c" style="display:block; text-decoration:none;" onclick="showStep('step-form')">${config.t3}</a>
+        </div>
+
+        <div id="step-form" class="client-card" style="display:none;">
+            <img src="${config.l}" style="max-width:80px; margin-bottom:20px;">
+            <h3>Dernière étape !</h3>
+            <p style="font-size: 14px; color: #666;">Complétez vos infos pour lancer la roue.</p>
+            <input type="text" id="c_nom" placeholder="Votre nom complet" required>
+            <input type="email" id="c_email" placeholder="Votre email" required>
+            <input type="tel" id="c_tel" placeholder="Votre téléphone" required>
+            <label style="font-size: 11px; display: flex; gap: 8px; text-align: left; align-items: flex-start; margin-top: 10px;">
+                <input type="checkbox" id="c_rgpd" required style="margin-top:2px;"> 
+                <span>J'accepte que mes données soient collectées pour être recontacté si je gagne. J'accepte le règlement du jeu et l'utilisation de mes données pour ma participation. J'accepte également de recevoir des offres promotionnelles de l'établissement par email et téléphone.</span>
+            </label>
+            <button class="btn-black-c" onclick="validateForm()">VALIDER ET JOUER</button>
+        </div>
+
+        <div id="step-wheel" class="client-card" style="display:none;">
+            <h2 style="margin-bottom: 25px;">${config.tw}</h2> 
+            <div class="wheel-box-client" id="client-bulbs-container">
+                <div class="client-pointer"></div>
+                <img src="${config.l}" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:50px; height:50px; border-radius:50%; background:white; z-index:5; border:2px solid #fff;">
+                <canvas id="rc" width="280" height="280"></canvas>
+            </div>
+            <button id="spin-btn" class="btn-black-c" onclick="spinClient()">LANCER LA ROUE</button>
+            <div id="res-box" style="display:none; border:2px solid #000; padding:15px; border-radius:15px; margin-top:20px;">
+                 <h3>Résultat : </h3>
+                 <p style="font-size:20px; font-weight:bold;"><span id="win-txt"></span></p>
+                 <p style="font-size:10px; text-align:justify;">${config.tc}</p>
+            </div>
+        </div>`;
+
+        window.showStep = (id) => {
+            document.getElementById('step-avis').style.display = 'none';
+            document.getElementById('step-form').style.display = 'none';
+            document.getElementById('step-wheel').style.display = 'none';
+            document.getElementById(id).style.display = 'block';
+            if(id === 'step-wheel') {
+                drawClientWheel(config);
+                setTimeout(() => {
+                    const count = 16;
+                    const container = document.getElementById('client-bulbs-container');
+                    for (let i = 0; i < count; i++) {
+                        const bulb = document.createElement('div');
+                        bulb.className = 'bulb-client';
+                        const angle = (i / count) * (Math.PI * 2);
+                        bulb.style.left = `${50 + 52 * Math.cos(angle)}%`;
+                        bulb.style.top = `${50 + 52 * Math.sin(angle)}%`;
+                        bulb.style.transform = 'translate(-50%, -50%)';
+                        bulb.style.animationDelay = `${(i % 2) * 0.3}s`;
+                        container.appendChild(bulb);
+                    }
+                }, 50);
+            }
+        };
+
+        window.validateForm = () => {
+            if(!document.getElementById('c_nom').value || !document.getElementById('c_email').value || !document.getElementById('c_rgpd').checked) {
+                alert("Merci de remplir tous les champs et d'accepter les conditions.");
+                return;
+            }
+            showStep('step-wheel');
+        };
+
+        window.spinClient = async () => {
+            const btn = document.getElementById('spin-btn');
+            btn.style.display = 'none';
+            const r = Math.random() * 100; let s = 0, t = 0;
+            for(let i=0; i<config.p.length; i++){ s += config.p[i]; if(r <= s){ t = i; break; } }
+            
+            const deg = 3600 + (360 - (t * (360/config.n.length)) - (180/config.n.length)) + 270;
+            document.getElementById('rc').style.transform = `rotate(${deg}deg)`;
+            
+            const end = Date.now() + 5000;
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            setTimeout(async () => {
+                const winLabel = config.n[t];
+                document.getElementById('win-txt').innerText = winLabel;
+                document.getElementById('res-box').style.display = 'block';
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+                await fetch(`${SB_URL}/rest/v1/roulette_participants`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        config_id: configId,
+                        nom: document.getElementById('c_nom').value,
+                        email: document.getElementById('c_email').value,
+                        telephone: document.getElementById('c_tel').value,
+                        lot_gagne: winLabel,
+                        OPTIN: document.getElementById('c_rgpd').checked ? "oui" : "non"
+                    })
+                });
+            }, 5200);
+        };
+    }
+
+    function drawClientWheel(config) {
+        const canvas = document.getElementById('rc'), ctx = canvas.getContext('2d'), arc = (2 * Math.PI) / config.n.length;
+        const cx = 140, cy = 140, r = 140; 
+        config.n.forEach((n, i) => {
+            ctx.beginPath(); ctx.fillStyle = config.bg[i];
+            ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, i * arc, (i + 1) * arc); ctx.fill();
+            ctx.save(); ctx.translate(cx, cy); ctx.rotate(i * arc + arc / 2);
+            ctx.fillStyle = config.tx[i]; ctx.font = `bold ${config.s[i]}px Arial`; ctx.textAlign = "left";
+            
+            if (n.length > 10 && n.includes(' ')) {
+                const mid = Math.floor(n.length / 2);
+                const spaceIdx = n.indexOf(' ', mid) !== -1 ? n.indexOf(' ', mid) : n.lastIndexOf(' ', mid);
+                if (spaceIdx !== -1) {
+                    ctx.fillText(n.substring(0, spaceIdx), 60, -(config.s[i]/2));
+                    ctx.fillText(n.substring(spaceIdx + 1), 60, (config.s[i]/2) + 2);
+                } else { ctx.fillText(n, 60, 5); }
+            } else { ctx.fillText(n, 60, 5); }
+            
+            ctx.restore();
+        });
+        ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(cx, cy, 32, 0, Math.PI * 2); ctx.fill();
+    }
+
+    window.onload = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const configId = urlParams.get('id');
+        if (configId) {
+            const response = await fetch(`${SB_URL}/rest/v1/roulette_configs?id=eq.${configId}&select=data`, {
+                headers: { 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY }
+            });
+            const result = await response.json();
+            if (result[0]) renderClient(result[0].data, configId);
+        } else {
+            defaultLots.forEach(lot => addLotRow(lot.n, lot.p, lot.s, lot.bg, lot.tx));
+            update();
+        }
+    };
+  /* --- SCRIPT À RAJOUTER --- */
+
+// 1. Application du fond sur l'aperçu du configurateur
+const styleBg = document.createElement('style');
+styleBg.innerHTML = `
+    .bg-custom { 
+        background-image: url('https://drscbjrshjhupvrrzqec.supabase.co/storage/v1/object/public/logos/1770076221296-bg.jpg') !important; 
+        background-size: cover !important; 
+        background-position: center !important; 
+    }
+    .screen-mockup:nth-child(1), .screen-mockup:nth-child(3) { 
+        background-image: url('https://drscbjrshjhupvrrzqec.supabase.co/storage/v1/object/public/logos/1770076221296-bg.jpg'); 
+        background-size: cover; 
+        background-position: center; 
+    }
+    /* Amélioration lisibilité texte sur l'aperçu */
+    .screen-mockup:nth-child(3) h4 { color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
+`;
+document.head.appendChild(styleBg);
+
+// 2. Modification du rendu client (Mobile) pour inclure le fond
+const originalRenderClient = renderClient;
+renderClient = function(config, configId) {
+    originalRenderClient(config, configId);
+    
+    // Ajout du fond plein écran sur le body mobile
+    const clientBg = document.createElement('div');
+    clientBg.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://drscbjrshjhupvrrzqec.supabase.co/storage/v1/object/public/logos/1770076221296-bg.jpg');
+        background-size: cover; background-position: center; z-index: -1;
+    `;
+    document.body.prepend(clientBg);
+    
+    // Rendre les cartes semi-transparentes pour voir le fond
+    const cards = document.querySelectorAll('.client-card');
+    cards.forEach(card => {
+        card.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+        card.style.backdropFilter = "blur(5px)";
+    });
+};
+</script>
