@@ -85,7 +85,7 @@
     .input-wrapper { display: flex; flex-direction: column; gap: 4px; }
     .mobile-label { display: none; font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; }
 
-    input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+    input, textarea, select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
     .ln { flex: 2; height: 40px; min-width: 0; width: 100%; } 
     .lp { width: 70px; text-align: center; font-weight: bold; } 
     .ls { width: 70px; text-align: center; } 
@@ -167,22 +167,40 @@
 
 <div class="main-wrapper" id="main-content">
     <div class="panel panel-config">
-        <h2>⚙️ Configuration de votre jeu 100% personnalisé :</h2>
+        <h2 id="conf-title">⚙️ Configuration de votre jeu 100% personnalisé :</h2>
 
-        <details>
-            <summary>🖼️ Logo & branding</summary>
-            <label>Personnaliser le jeu avec votre logo :</label>
+        <div style="margin-bottom: 20px; padding: 15px; background: #f1f3f5; border-radius: 12px;">
+            <label id="lbl-lang">🌐 Choisir la langue du jeu :</label>
+            <select id="game_lang" class="full-width" onchange="changeLanguage(this.value)">
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+                <option value="ar">🇸🇦 العربية (Arabe)</option>
+                <option value="pt">🇵🇹 Português</option>
+                <option value="ru">🇷🇺 Русский (Russe)</option>
+                <option value="zh">🇨🇳 中文 (Chinois)</option>
+                <option value="ja">🇯🇵 日本語 (Japonais)</option>
+                <option value="bn">🇧🇩 বাঙালি (Bengali)</option>
+                <option value="pa">🇮🇳 ਪੰਜਾਬੀ (Pendjabi)</option>
+            </select>
+        </div>
+
+        <details open>
+            <summary id="sum-logo">🖼️ Logo & branding</summary>
+            <label id="lbl-logo-file">Personnaliser le jeu avec votre logo :</label>
             <div class="upload-wrapper">
                 <input type="file" id="logo_file_input" accept="image/*" onchange="uploadLogoDirect(this, 'logo_url', 'upload-status')">
                 <div id="upload-status">Formats acceptés : PNG, JPG, WEBP</div>
             </div>
-            <label>ou indiquer l’URL du logo si il est stocké en ligne :</label>
+            <label id="lbl-logo-url">ou indiquer l’URL du logo si il est stocké en ligne :</label>
             <input type="text" id="logo_url" class="full-width" oninput="update()" value="https://drscbjrshjhupvrrzqec.supabase.co/storage/v1/object/public/logos/1770049092342-yourlogo.png">
         </details>
 
         <details>
-            <summary>🎨 Écrans & couleurs</summary>
-            <label>Personaliser les écrans de jeu (fond image et/ou couleur et couleur texte) :</label>
+            <summary id="sum-screen">🎨 Écrans & couleurs</summary>
+            <label id="lbl-screen-cust">Personaliser les écrans de jeu (fond image et/ou couleur et couleur texte) :</label>
             <div class="upload-wrapper">
                 <button class="delete-bg" onclick="document.getElementById('bg_url').value=''; update();" title="Supprimer l'image">×</button>
                 <input type="file" id="bg_file_input" accept="image/*" onchange="uploadLogoDirect(this, 'bg_url', 'bg-upload-status')">
@@ -192,86 +210,102 @@
             <div class="brand-colors">
                 <div class="color-input-group">
                     <input type="color" id="bg_color" value="#ffffff" oninput="update()">
-                    <div>COULEUR FOND</div>
+                    <div id="lbl-col-bg">COULEUR FOND</div>
                 </div>
                 <div class="color-input-group">
                     <input type="range" id="bg_opacity" min="0" max="1" step="0.1" value="0.4" oninput="update()" style="width: 60px; vertical-align: middle;">
-                    <div>OPACITÉ COULEUR FOND</div>
+                    <div id="lbl-col-op">OPACITÉ COULEUR FOND</div>
                 </div>
                 <div class="color-input-group">
                     <input type="color" id="text_color" value="#333333" oninput="update()">
-                    <div>COULEUR TEXTE</div>
+                    <div id="lbl-col-txt">COULEUR TEXTE</div>
                 </div>
                 <div class="color-input-group">
                     <input type="color" id="button_color" value="#000000" oninput="update()">
-                    <div>COULEUR BOUTONS</div>
+                    <div id="lbl-col-btn">COULEUR BOUTONS</div>
                 </div>
             </div>
         </details>
 
         <details>
-            <summary>🎡 Design de la roue</summary>
-            <label>Design de la roue bordure et lumière :</label>
+            <summary id="sum-wheel">🎡 Design de la roue</summary>
+            <label id="lbl-wheel-design">Design de la roue bordure et lumière :</label>
             <div class="brand-colors" style="flex-wrap: wrap;">
                 <div class="color-input-group">
                     <input type="color" id="wheel_border_color" value="#ff004c" oninput="update()">
-                    <div>COULEUR BORDURE</div>
+                    <div id="lbl-col-bord">COULEUR BORDURE</div>
                 </div>
                 <div class="color-input-group">
                     <input type="color" id="wheel_bulb_color" value="#FFD700" oninput="update()">
-                    <div>COULEUR LUMIÈRES</div>
+                    <div id="lbl-col-bulb">COULEUR LUMIÈRES</div>
                 </div>
                 <div class="color-input-group">
                     <input type="number" id="wheel_bulb_size" value="16" min="2" max="20" oninput="update()" style="width: 50px; padding: 5px;">
-                    <div>TAILLE LUMIÈRES (px)</div>
+                    <div id="lbl-size-bulb">TAILLE LUMIÈRES (px)</div>
                 </div>
             </div>
-            <label>Configuration rapide du couleur de votre marque :</label>
+            <label id="lbl-brand-quick">Configuration rapide du couleur de votre marque :</label>
             <div class="brand-colors">
                 <div class="color-input-group">
                     <input type="color" id="color1" value="#cdc7fc" oninput="updateAllLotsColors(this.value, 'bg')">
-                    <div>COULEUR PAR DÉFAUT 1</div>
+                    <div id="lbl-col-def1">COULEUR PAR DÉFAUT 1</div>
                 </div>
                 <div style="font-size: 20px;">🔄</div>
                 <div class="color-input-group">
                     <input type="color" id="color2" value="#fa879a" oninput="updateAllLotsColors(this.value, 'bg')">
-                    <div>COULEUR PAR DÉFAUT 2</div>
+                    <div id="lbl-col-def2">COULEUR PAR DÉFAUT 2</div>
                 </div>
             </div>
         </details>
 
         <details>
-            <summary>🎁 Gestion lots & probabilités</summary>
-            <label>Personalisez le nom des lots et les probabilités : </label>
+            <summary id="sum-lots">🎁 Gestion lots & probabilités</summary>
+            <label id="lbl-lots-cust">Personalisez le nom des lots et les probabilités : </label>
             <div class="labels-row">
-                <div class="ln-label">NOM DU LOT A GAGNER</div>
-                <div class="lp-label">PROBABILITE DE GAIN</div>
-                <div class="ls-label">TAILLE TEXTE</div>
-                <div class="lc-label">COULEUR DE FOND</div>
-                <div class="lc-label">COULEUR DU TEXTE</div>
+                <div class="ln-label" id="lbl-row-name">NOM DU LOT A GAGNER</div>
+                <div class="lp-label" id="lbl-row-prob">PROBABILITE DE GAIN</div>
+                <div class="ls-label" id="lbl-row-size">TAILLE TEXTE</div>
+                <div class="lc-label" id="lbl-row-bg">COULEUR DE FOND</div>
+                <div class="lc-label" id="lbl-row-txt">COULEUR DU TEXTE</div>
             </div>
             <div id="lots-inputs"></div>
             <div class="btn-add-container">
-                <button class="btn-add" onclick="addLotRow('', 0, 12, '#000000', '#ffffff')"><span>+</span> rajouter un lot</button>
+                <button class="btn-add" id="btn-add-lot" onclick="addLotRow('', 0, 12, '#000000', '#ffffff')"><span>+</span> rajouter un lot</button>
             </div>
             <div id="prob-info"></div>
         </details>
 
-        <details>
-            <summary>📝 Textes & conditions</summary>
-            <label>Textes à personnaliser :</label>
+        <details id="details_texts">
+            <summary id="sum-texts">📝 Textes & conditions</summary>
+            <label id="lbl-txt-cust">Textes à personnaliser :</label>
             <input type="text" id="t1" class="full-width" value="Cadeaux à gagner ! ✨" oninput="update()">
             <input type="text" id="t2" class="full-width" value="Laissez un avis pour débloquer la roue. Voir conditions* dans votre point de vente." oninput="update()">
             <input type="text" id="t3" class="full-width" value="LAISSEZ UN AVIS" oninput="update()">
             <input type="text" id="t_wheel" class="full-width" value="Tournez la roue et tentez de gagner* de nombreux cadeaux !" oninput="update()">
-            <label>Conditions de participation :</label>
+            
+            <label id="lbl-qr-scanner">Texte affiche QR (Scannez-moi) :</label>
+            <input type="text" id="t_qr_scan" class="full-width" value="Scannez-moi" oninput="update()">
+
+            <label id="lbl-form-fields">Champs & boutons (Formulaire) :</label>
+            <input type="text" id="t_last_step" class="full-width" value="Dernière étape !" oninput="update()" placeholder="Titre formulaire">
+            <input type="text" id="t_name" class="full-width" value="Nom complet" oninput="update()" placeholder="Placeholder Nom">
+            <input type="text" id="t_email" class="full-width" value="Email" oninput="update()" placeholder="Placeholder Email">
+            <input type="text" id="t_phone" class="full-width" value="Téléphone" oninput="update()" placeholder="Placeholder Téléphone">
+            <input type="text" id="t_btn_validate" class="full-width" value="VALIDER ET JOUER" oninput="update()" placeholder="Texte bouton valider">
+            
+            <label id="lbl-end-msg">Boutons & messages de fin :</label>
+            <input type="text" id="t_btn_spin" class="full-width" value="LANCEZ LA ROUE" oninput="update()" placeholder="Texte bouton lancer">
+            <input type="text" id="t_thanks" class="full-width" value="Merci pour votre participation ! 🎉" oninput="update()" placeholder="Message merci">
+            <input type="text" id="t_res_label" class="full-width" value="Résultat :" oninput="update()" placeholder="Texte avant résultat">
+
+            <label id="lbl-cond-part">Conditions de participation :</label>
             <textarea id="t_cond" class="full-width" rows="6" oninput="update()">Si vous avez gagné, présenter cet écran à l’accueil. Le jeu est ouvert à toute personne physique majeure, sans obligation d’achat. La participation est strictement limitée à un seul lancer par personne. Les gains obtenus doivent être réclamés ou consommés immédiatement et ne peuvent être reportés à une date ultérieure en fonction des conditions. Les lots gagnés ne sont pas cumulables avec d'autres offres promotionnelles, réductions en cours dans l'établissement. Les lots sont proposés dans la limite des stocks disponibles. Les gains ne sont ni échangeables, ni remboursables en espèces. Vos données sont traitées pour la gestion du jeu.</textarea>
         </details>
 
         <details>
-            <summary>✅ Actions clients avant d'actionner la roue</summary>
-            <label>URL de destination (votre site web, votre fiche Google, votre page Insta / Facebook) :</label>
-            <input type="text" id="google_url" class="full-width" value="https://g.page/r/CdoMazxHMNgaEBM/review" oninput="update()">
+            <summary id="sum-actions">✅ Actions clients avant d'actionner la roue</summary>
+            <label id="lbl-google-url">URL de destination (votre site web, votre fiche Google, votre page Insta / Facebook) :</label>
+            <input type="text" id="google_url" class="full-width" value="https://search.google.com/local/writereview?placeid=ChIJx_26Jupv5kcR47OyH6966iE" oninput="update()">
         </details>
 
         <button id="btn-gen" class="btn-black" style="width:100%; margin-top:20px;" onclick="saveAndGenerate()">Générer le QR Code</button>
@@ -280,22 +314,22 @@
             <div id="qrcode-area">
                 <img id="qr-logo-top" src="" style="max-width: 150px; max-height: 80px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;" loading="lazy">
                 <h3 id="qr-title" style="margin: 0; font-size: 22px; color: #000; font-weight: bold;">Cadeau à gagner ! ✨</h3>
-                <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #333;">Scannez-moi</p>
+                <p id="qr-scan-text" style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #333;">Scannez-moi</p>
                 <div id="qrcode"></div>
                 <p id="qr-id-display" style="font-family: monospace; font-weight: bold; margin-top: 5px; color: #555;"></p>
             </div>
             <div class="qr-actions">
-                <button class="btn-download" onclick="downloadQR('png')">Télécharger PNG et imprimer</button>
-                <button class="btn-download" onclick="downloadQR('pdf')">Télécharger PDF et imprimer</button>
+                <button class="btn-download" id="btn-dl-png" onclick="downloadQR('png')">Télécharger PNG et imprimer</button>
+                <button class="btn-download" id="btn-dl-pdf" onclick="downloadQR('pdf')">Télécharger PDF et imprimer</button>
             </div>
         </div>
     </div>
 
     <div class="panel panel-preview">
-        <h2>👁️ Aperçu du parcours de votre client</h2>
+        <h2 id="prev-title">👁️ Aperçu du parcours de votre client</h2>
         <div class="preview-grid">
             <div class="screen-mockup" id="pre-s1">
-                <span class="screen-label">Étape 1 : Avis</span>
+                <span class="screen-label" id="stp1-lbl">Étape 1 : Avis</span>
                 <div style="margin-top:40px;">
                     <img id="pre-logo-pop" src="" style="max-width: 100px; margin-bottom: 15px;" loading="lazy">
                     <div style="padding:15px;">
@@ -306,37 +340,37 @@
                 </div>
             </div>
             <div class="screen-mockup" id="pre-s2">
-                <span class="screen-label">Étape 2 : Formulaire</span>
+                <span class="screen-label" id="stp2-lbl">Étape 2 : Formulaire</span>
                 <div style="margin-top:30px; text-align: left; padding: 0 10px;">
-                    <h5 style="margin: 0 0 10px 0; text-align: center;">Dernière étape !</h5>
+                    <h5 id="pre-t-last" style="margin: 0 0 10px 0; text-align: center;"></h5>
                     <div class="mock-form">
-                        <input type="text" placeholder="Nom complet" disabled="">
-                        <input type="text" placeholder="Email" disabled="">
-                        <input type="text" placeholder="Téléphone" disabled="">
+                        <input type="text" id="pre-ph-name" placeholder="" disabled="">
+                        <input type="text" id="pre-ph-email" placeholder="" disabled="">
+                        <input type="text" id="pre-ph-phone" placeholder="" disabled="">
                         <div style="font-size: 9px; display: flex; gap: 5px; align-items: flex-start; margin-top: 10px;">
                             <input type="checkbox" checked="" style="width: auto;">
-                            <span>J'accepte que mes données soient collectées pour être recontacté si je gagne. J'accepte le règlement du jeu et l'utilisation de mes données pour ma participation. J'accepte également de recevoir des offres promotionnelles de l'établissement par email et téléphone.</span>
+                            <span id="pre-rgpd-text"></span>
                         </div>
-                        <div class="btn-black" style="font-size:10px; padding:10px; width: 100%; margin-top: 15px;">VALIDER ET JOUER</div>
+                        <div class="btn-black" id="pre-btn-val" style="font-size:10px; padding:10px; width: 100%; margin-top: 15px;"></div>
                     </div>
                 </div>
             </div>
             <div class="screen-mockup" id="pre-s3">
-                <span class="screen-label">Étape 3 : Jeu</span>
+                <span class="screen-label" id="stp3-lbl">Étape 3 : Jeu</span>
                 <h4 id="pre-twheel" style="margin: 10px 0; font-size: 14px;"></h4>
                 <div class="wheel-container" id="preview-bulbs-container">
                     <div class="pointer" id="pre-pointer"></div>
                     <img id="pre-logo-wheel" src="" class="logo-center-preview" loading="lazy">
                     <canvas id="canvas-preview" width="200" height="200"></canvas>
                 </div>
-                <div class="btn-black" id="btn-spin-preview" onclick="spinPreview()" style="font-size:10px; padding:10px 20px; width:150px;">LANCEZ LA ROUE</div>
+                <div class="btn-black" id="pre-btn-spin" onclick="spinPreview()" style="font-size:10px; padding:10px 20px; width:150px;"></div>
             </div>
             <div class="screen-mockup" id="pre-s4">
-                <span class="screen-label">Étape 4 : Résultat</span>
+                <span class="screen-label" id="stp4-lbl">Étape 4 : Résultat</span>
                 <div class="gain-box" style="margin-top:30px;">
                     <img id="pre-logo-gain" src="" style="max-width: 50px; margin-bottom: 10px;" loading="lazy">
-                    <h4 style="margin:0; font-size: 13px;">Merci pour votre participation ! 🎉</h4>
-                    <p style="font-size:12px; font-weight:bold; margin:10px 0;">Résultat : <span id="preview-win-txt">[Nom du gain]</span></p>
+                    <h4 id="pre-t-thanks" style="margin:0; font-size: 13px;"></h4>
+                    <p style="font-size:12px; font-weight:bold; margin:10px 0;"><span id="pre-t-res"></span> <span id="preview-win-txt">[Nom du gain]</span></p>
                     <p id="pre-cond" style="font-size:8px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px; margin-top:10px; text-align:justify; line-height:1.2;"></p>
                 </div>
             </div>
@@ -347,6 +381,188 @@
 <script>
     const SB_URL = "https://drscbjrshjhupvrrzqec.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyc2NianJzaGpodXB2cnJ6cWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NDM2NDUsImV4cCI6MjA4NTExOTY0NX0.t15POxBSoA0bmQ0WXEBN0sClGRtvxc1JKYGeaY65Y7g";
+
+    // Traductions de l'interface du configurateur (UI)
+    const uiTranslations = {
+        fr: {
+            confTitle: "⚙️ Configuration de votre jeu 100% personnalisé :",
+            lblLang: "🌐 Choisir la langue du jeu :",
+            sumLogo: "🖼️ Logo & branding",
+            lblLogoFile: "Personnaliser le jeu avec votre logo :",
+            lblLogoUrl: "ou indiquer l’URL du logo si il est stocké en ligne :",
+            sumScreen: "🎨 Écrans & couleurs",
+            lblScreenCust: "Personaliser les écrans de jeu (fond image et/ou couleur et couleur texte) :",
+            lblColBg: "COULEUR FOND",
+            lblColOp: "OPACITÉ FOND",
+            lblColTxt: "COULEUR TEXTE",
+            lblColBtn: "COULEUR BOUTONS",
+            sumWheel: "🎡 Design de la roue",
+            lblWheelDesign: "Design de la roue bordure et lumière :",
+            lblColBord: "COULEUR BORDURE",
+            lblColBulb: "COULEUR LUMIÈRES",
+            lblSizeBulb: "TAILLE LUMIÈRES (px)",
+            lblBrandQuick: "Configuration rapide des couleurs :",
+            lblColDef1: "COULEUR DÉFAUT 1",
+            lblColDef2: "COULEUR DÉFAUT 2",
+            sumLots: "🎁 Gestion lots & probabilités",
+            lblLotsCust: "Personalisez le nom des lots et les probabilités :",
+            lblRowName: "NOM DU LOT",
+            lblRowProb: "PROBABILITÉ %",
+            lblRowSize: "TAILLE TEXTE",
+            lblRowBg: "FOND",
+            lblRowTxt: "TEXTE",
+            btnAddLot: "+ rajouter un lot",
+            sumTexts: "📝 Textes & conditions",
+            lblTxtCust: "Textes à personnaliser :",
+            lblQrScanner: "Texte affiche QR (Scannez-moi) :",
+            lblFormFields: "Champs & boutons (Formulaire) :",
+            lblEndMsg: "Boutons & messages de fin :",
+            lblCondPart: "Conditions de participation :",
+            sumActions: "✅ Actions clients avant la roue",
+            lblGoogleUrl: "URL de destination (Google, Insta...) :",
+            btnGen: "Générer le QR Code",
+            btnDlPng: "Télécharger PNG",
+            btnDlPdf: "Télécharger PDF",
+            prevTitle: "👁️ Aperçu du parcours client",
+            stp1Lbl: "Étape 1 : Avis",
+            stp2Lbl: "Étape 2 : Formulaire",
+            stp3Lbl: "Étape 3 : Jeu",
+            stp4Lbl: "Étape 4 : Résultat",
+            qrScanDefault: "Scannez-moi"
+        },
+        en: {
+            confTitle: "⚙️ Configure your 100% personalized game:",
+            lblLang: "🌐 Choose game language:",
+            sumLogo: "🖼️ Logo & branding",
+            lblLogoFile: "Customize the game with your logo:",
+            lblLogoUrl: "or provide the logo URL if stored online:",
+            sumScreen: "🎨 Screens & Colors",
+            lblScreenCust: "Customize game screens (background and text):",
+            lblColBg: "BG COLOR",
+            lblColOp: "BG OPACITY",
+            lblColTxt: "TEXT COLOR",
+            lblColBtn: "BUTTON COLOR",
+            sumWheel: "🎡 Wheel Design",
+            lblWheelDesign: "Wheel border and lights design:",
+            lblColBord: "BORDER COLOR",
+            lblColBulb: "LIGHTS COLOR",
+            lblSizeBulb: "LIGHTS SIZE (px)",
+            lblBrandQuick: "Quick color configuration:",
+            lblColDef1: "DEFAULT COLOR 1",
+            lblColDef2: "DEFAULT COLOR 2",
+            sumLots: "🎁 Prizes & Probabilities",
+            lblLotsCust: "Customize prize names and probabilities:",
+            lblRowName: "PRIZE NAME",
+            lblRowProb: "PROBABILITY %",
+            lblRowSize: "TEXT SIZE",
+            lblRowBg: "BG",
+            lblRowTxt: "TEXT",
+            btnAddLot: "+ add a prize",
+            sumTexts: "📝 Texts & Conditions",
+            lblTxtCust: "Customizable texts:",
+            lblQrScanner: "QR Poster Text (Scan me):",
+            lblFormFields: "Fields & Buttons (Form):",
+            lblEndMsg: "End buttons & messages:",
+            lblCondPart: "Terms of participation:",
+            sumActions: "✅ Actions before spinning",
+            lblGoogleUrl: "Destination URL (Google, Insta...):",
+            btnGen: "Generate QR Code",
+            btnDlPng: "Download PNG",
+            btnDlPdf: "Download PDF",
+            prevTitle: "👁️ Customer Journey Preview",
+            stp1Lbl: "Step 1: Review",
+            stp2Lbl: "Step 2: Form",
+            stp3Lbl: "Step 3: Game",
+            stp4Lbl: "Step 4: Result",
+            qrScanDefault: "Scan me"
+        }
+    };
+
+    const translations = {
+        fr: { t1: "Cadeaux à gagner ! ✨", t2: "Laissez un avis pour débloquer la roue. Voir conditions* dans votre point de vente.", t3: "LAISSEZ UN AVIS", tw: "Tournez la roue et tentez de gagner* de nombreux cadeaux !", last: "Dernière étape !", name: "Nom complet", email: "Email", phone: "Téléphone", val: "VALIDER ET JOUER", spin: "LANCEZ LA ROUE", thx: "Merci pour votre participation ! 🎉", res: "Résultat :", cond: "Si vous avez gagné, présenter cet écran à l’accueil. Le jeu est ouvert à toute personne physique majeure, sans obligation d’achat. La participation est strictement limitée à un seul lancer par personne. Les gains obtenus doivent être réclamés ou consommés immédiatement et ne peuvent être reportés à une date ultérieure en fonction des conditions. Les lots gagnés ne sont pas cumulables avec d'autres offres promotionnelles, réductions en cours dans l'établissement. Les lots sont proposés dans la limite des stocks disponibles. Les gains ne sont ni échangeables, ni remboursables en espèces. Vos données sont traitées pour la gestion du jeu.", rgpd: "J'accepte que mes données soient collectées pour être recontacté si je gagne. J'accepte le règlement du jeu et l'utilisation de mes données pour ma participation. J'accepte également de recevoir des offres promotionnelles de l'établissement par email et téléphone.", qr: "Scannez-moi" },
+        en: { t1: "Gifts to win! ✨", t2: "Leave a review to unlock the wheel. See conditions* at your point of sale.", t3: "LEAVE A REVIEW", tw: "Spin the wheel and try to win* many gifts!", last: "Last step!", name: "Full Name", email: "Email", phone: "Phone", val: "VALIDATE AND PLAY", spin: "SPIN THE WHEEL", thx: "Thank you for participating! 🎉", res: "Result:", cond: "If you have won, present this screen at the reception. The game is open to any adult individual, without obligation to purchase. Participation is strictly limited to one spin per person. Winnings must be claimed or consumed immediately and cannot be postponed. Prizes cannot be combined with other ongoing promotions. Prizes are available while supplies last. Winnings are neither exchangeable nor refundable in cash. Your data is processed for game management.", rgpd: "I agree that my data will be collected to be contacted if I win. I accept the game rules and the use of my data for my participation. I also agree to receive promotional offers from the establishment by email and phone.", qr: "Scan me" },
+        es: { t1: "¡Regalos para ganar! ✨", t2: "Deja una reseña para desbloquear la rueda. Ver condiciones* en tu punto de venta.", t3: "DEJAR UNA RESEÑA", tw: "¡Gira la rueda e intenta ganar* muchos regalos!", last: "¡Último paso!", name: "Nombre completo", email: "Correo electrónico", phone: "Teléfono", val: "VALIDAR Y JUGAR", spin: "GIRAR LA RUEDA", thx: "¡Gracias por participar! 🎉", res: "Resultado:", cond: "Si ha ganado, presente esta pantalla en la recepción. El juego está abierto a cualquier persona física mayor de edad, sin obligación de compra. La participación está estrictamente limitada a un lanzamiento por persona. Las ganancias deben reclamarse o consumirse de inmediato. Los premios no son acumulables con otras promociones. Los premios están disponibles hasta agotar existencias. Las ganancias no son canjeables ni reembolsables en efectivo. Sus datos se procesan para la gestión del juego.", rgpd: "Acepto que mis datos se recopilen para ser contactado si gano. Acepto las reglas del juego y el uso de mis datos para mi participación. También acepto recibir ofertas promocionales del establecimiento por correo electrónico y teléfono.", qr: "Escanéame" },
+        de: { t1: "Geschenke zu gewinnen! ✨", t2: "Hinterlassen Sie eine Bewertung, um das Rad freizuschalten. Siehe Bedingungen* in Ihrem Geschäft.", t3: "BEWERTUNG ABGEBEN", tw: "Drehen Sie am Rad und versuchen Sie, viele Geschenke zu gewinnen!", last: "Letzter Schritt!", name: "Vollständiger Name", email: "E-Mail", phone: "Telefon", val: "BESTÄTIGEN & SPIELEN", spin: "RAD DREHEN", thx: "Vielen Dank für Ihre Teilnahme! 🎉", res: "Ergebnis:", cond: "Wenn Sie gewonnen haben, zeigen Sie diesen Bildschirm am Empfang vor. Das Spiel steht jeder volljährigen Person ohne Kaufzwang offen. Die Teilnahme ist streng auf einen Wurf pro Person begrenzt. Gewinne müssen sofort beansprucht oder verbraucht werden. Die Preise nicht kombinierbar. Gewinne sind weder umtauschbar noch in bar erstattungsfähig. Ihre Daten werden für das Spielmanagement verarbeitet.", rgpd: "Ich stimme zu, dass meine Daten gesammelt werden, um im Falle eines Gewinns kontaktiert zu werden.", qr: "Scannen" },
+        hi: { t1: "उपहार जीतने के लिए! ✨", t2: "पहिया अनलॉक करने के लिए समीक्षा छोड़ें। अपने बिक्री केंद्र पर शर्तें* देखें।", t3: "समीक्षा लिखें", tw: "पहिया घुमाएं और कई उपहार जीतने का प्रयास करें!", last: "अंतिम चरण!", name: "पूरा नाम", email: "ईमेल", phone: "फ़ोन", val: "पुष्टि करें और खेलें", spin: "पहिया घुमाएं", thx: "भाग लेने के लिए धन्यवाद! 🎉", res: "परिणाम:", cond: "यदि आपने जीत हासिल की है, तो रिसेप्शन पर यह स्क्रीन दिखाएं।", rgpd: "मैं सहमत हूँ कि जीतने पर मुझसे संपर्क करने के लिए मेरा डेटा एकत्र किया जाएगा।", qr: "मुझे स्कैन करें" },
+        ar: { t1: "هدايا للربح! ✨", t2: "اترك تقييمًا لفتح العجلة. انظر الشروط* في نقطة البيع الخاصة بك.", t3: "اترك تقييمًا", tw: "أدر العجلة وحاول ربح العديد من الهدايا!", last: "الخطوة الأخيرة!", name: "الاسم الكامل", email: "البريد الإلكتروني", phone: "الهاتف", val: "تأكيد واللعب", spin: "أدر العجلة", thx: "شكراً لمشاركتك! 🎉", res: "النتيجة:", cond: "إذا فزت، اعرض هذه الشاشة في الاستقبال.", rgpd: "أوافق على جمع بياناتي ليتم الاتصال بي في حالة فوزي.", qr: "امسح الكود" },
+        pt: { t1: "Presentes para ganhar! ✨", t2: "Deixe um comentário para desbloquear a roda.", t3: "DEIXAR UM COMENTÁRIO", tw: "Gire a roda e tente ganhar muitos presentes!", last: "Última etapa!", name: "Nome completo", email: "E-mail", phone: "Telefone", val: "VALIDAR E JOGAR", spin: "GIRAR A RODA", thx: "Obrigado pela sua participação! 🎉", res: "Resultado:", cond: "Se ganhou, apresente este ecrã na receção.", rgpd: "Concordo que os meus dados sejam recolhidos.", qr: "Digitalize-me" },
+        ru: { t1: "Подарки ждут! ✨", t2: "Оставьте отзыв, чтобы разблокировать колесо.", t3: "ОСТАВИТЬ ОТЗЫВ", tw: "Вращайте колесо и попробуйте выиграть много призов!", last: "Последний шаг!", name: "Полное имя", email: "Email", phone: "Телефон", val: "ПОДТВЕРДИТЬ И ИГРАТЬ", spin: "КРУТИТЬ КОЛЕСО", thx: "Спасибо за участие! 🎉", res: "Результат:", cond: "Если вы выиграли, предъявите этот экран на стойке регистрации.", rgpd: "Я согласен на сбор моих данных.", qr: "Сканируй" },
+        zh: { t1: "赢得礼品！ ✨", t2: "留下评论即可解锁转盘。", t3: "留下评论", tw: "转动转盘，尝试赢取多种礼品！", last: "最后一步！", name: "全名", email: "电子邮件", phone: "电话", val: "确认并开始游戏", spin: "转动转盘", thx: "感谢您的参与！ 🎉", res: "结果：", cond: "如果您中奖，请在前台出示此屏幕。", rgpd: "我同意收集我的数据。", qr: "扫描我" },
+        ja: { t1: "景品を当てよう！ ✨", t2: "レビューを投稿してルーレットを回そう。", t3: "レビューを書く", tw: "ルーレットを回して豪華景品をゲットしよう！", last: "最後のステップ！", name: "氏名", email: "メールアドレス", phone: "電話番号", val: "確認してプレイ", spin: "ルーレットを回す", thx: "ご参加ありがとうございました！ 🎉", res: "結果：", cond: "当選した場合は、受付でこの画面を提示してください。", rgpd: "当選した場合に連絡を受けるために、私のデータが収集されることに同意します。", qr: "スキャン" },
+        bn: { t1: "উপহার জিতুন! ✨", t2: "চাকাটি আনলক করতে একটি পর্যালোচনা দিন।", t3: "রিভিউ দিন", tw: "চাকাটি ঘুরান এবং অনেক উপহার জেতার চেষ্টা করুন!", last: "শেষ ধাপ!", name: "পুরো নাম", email: "ইমেল", phone: "ফোন", val: "নিশ্চিত করুন এবং খেলুন", spin: "চাকা ঘুরান", thx: "অংশগ্রহণের জন্য ধন্যবাদ! 🎉", res: "ফলাফল:", cond: "আপনি যদি জিতে থাকেন তবে রিসেপশনে এই স্ক্রিনটি দেখান।", rgpd: "আমি সম্মত যে আমি জিতলে আমার সাথে যোগাযোগ করা হবে।", qr: "স্ক্যান করুন" },
+        pa: { t1: "ਤੋਹਫ਼ੇ ਜਿੱਤਣ ਲਈ! ✨", t2: "ਪਹੀਏ ਨੂੰ ਅਨਲੌਕ ਕਰਨ ਲਈ ਇੱਕ ਸਮੀਖਿਆ ਛੱਡੋ।", t3: "ਸਮੀਖਿਆ ਛੱਡੋ", tw: "ਪਹੀਏ ਨੂੰ ਘੁਮਾਓ ਅਤੇ ਕਈ ਤੋਹਫ਼ੇ ਜਿੱਤਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ!", last: "ਆਖਰੀ ਕਦਮ!", name: "ਪੂਰਾ ਨਾਮ", email: "ਈਮੇਲ", phone: "ਫੋਨ", val: "ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਖੇਡੋ", spin: "ਪਹੀਆ ਘੁਮਾਓ", thx: "ਭਾਗ ਲੈਣ ਲਈ ਧੰਨਵਾਦ! 🎉", res: "ਨਤੀਜਾ:", cond: "ਜੇਕਰ ਤੁਸੀਂ ਜਿੱਤ ਗਏ ਹੋ, ਤਾਂ ਰਿਸੈਪਸ਼ਨ 'ਤੇ ਇਹ ਸਕ੍ਰੀਨ ਦਿਖਾਓ।", rgpd: "ਮੈਂ ਸਹਿਮਤ ਹਾਂ ਕਿ ਜੇਕਰ ਮੈਂ ਜਿੱਤਦਾ ਹਾਂ ਤਾਂ ਮੇਰਾ ਡੇਟਾ ਇਕੱਠਾ ਕੀਤਾ ਜਾਵੇਗਾ।", qr: "ਸਕੈਨ ਕਰੋ" }
+    };
+
+    function changeLanguage(lang) {
+        const t = translations[lang];
+        if(!t) return;
+        
+        // Mise à jour des champs personnalisables
+        document.getElementById('t1').value = t.t1;
+        document.getElementById('t2').value = t.t2;
+        document.getElementById('t3').value = t.t3;
+        document.getElementById('t_wheel').value = t.tw;
+        document.getElementById('t_last_step').value = t.last;
+        document.getElementById('t_name').value = t.name;
+        document.getElementById('t_email').value = t.email;
+        document.getElementById('t_phone').value = t.phone;
+        document.getElementById('t_btn_validate').value = t.val;
+        document.getElementById('t_btn_spin').value = t.spin;
+        document.getElementById('t_thanks').value = t.thx;
+        document.getElementById('t_res_label').value = t.res;
+        document.getElementById('t_cond').value = t.cond;
+        document.getElementById('t_qr_scan').value = t.qr;
+        
+        // Mise à jour de l'interface du configurateur (UI)
+        const ui = uiTranslations[lang] || uiTranslations.en;
+        if(ui) {
+            document.getElementById('conf-title').innerText = ui.confTitle;
+            document.getElementById('lbl-lang').innerText = ui.lblLang;
+            document.getElementById('sum-logo').innerText = ui.sumLogo;
+            document.getElementById('lbl-logo-file').innerText = ui.lblLogoFile;
+            document.getElementById('lbl-logo-url').innerText = ui.lblLogoUrl;
+            document.getElementById('sum-screen').innerText = ui.sumScreen;
+            document.getElementById('lbl-screen-cust').innerText = ui.lblScreenCust;
+            document.getElementById('lbl-col-bg').innerText = ui.lblColBg;
+            document.getElementById('lbl-col-op').innerText = ui.lblColOp;
+            document.getElementById('lbl-col-txt').innerText = ui.lblColTxt;
+            document.getElementById('lbl-col-btn').innerText = ui.lblColBtn;
+            document.getElementById('sum-wheel').innerText = ui.sumWheel;
+            document.getElementById('lbl-wheel-design').innerText = ui.lblWheelDesign;
+            document.getElementById('lbl-col-bord').innerText = ui.lblColBord;
+            document.getElementById('lbl-col-bulb').innerText = ui.lblColBulb;
+            document.getElementById('lbl-size-bulb').innerText = ui.lblSizeBulb;
+            document.getElementById('lbl-brand-quick').innerText = ui.lblBrandQuick;
+            document.getElementById('lbl-col-def1').innerText = ui.lblColDef1;
+            document.getElementById('lbl-col-def2').innerText = ui.lblColDef2;
+            document.getElementById('sum-lots').innerText = ui.sumLots;
+            document.getElementById('lbl-lots-cust').innerText = ui.lblLotsCust;
+            document.getElementById('lbl-row-name').innerText = ui.lblRowName;
+            document.getElementById('lbl-row-prob').innerText = ui.lblRowProb;
+            document.getElementById('lbl-row-size').innerText = ui.lblRowSize;
+            document.getElementById('lbl-row-bg').innerText = ui.lblRowBg;
+            document.getElementById('lbl-row-txt').innerText = ui.lblRowTxt;
+            document.getElementById('btn-add-lot').innerHTML = `<span>+</span> ${ui.btnAddLot}`;
+            document.getElementById('sum-texts').innerText = ui.sumTexts;
+            document.getElementById('lbl-txt-cust').innerText = ui.lblTxtCust;
+            document.getElementById('lbl-qr-scanner').innerText = ui.lblQrScanner;
+            document.getElementById('lbl-form-fields').innerText = ui.lblFormFields;
+            document.getElementById('lbl-end-msg').innerText = ui.lblEndMsg;
+            document.getElementById('lbl-cond-part').innerText = ui.lblCondPart;
+            document.getElementById('sum-actions').innerText = ui.sumActions;
+            document.getElementById('lbl-google-url').innerText = ui.lblGoogleUrl;
+            document.getElementById('btn-gen').innerText = ui.btnGen;
+            document.getElementById('btn-dl-png').innerText = ui.btnDlPng;
+            document.getElementById('btn-dl-pdf').innerText = ui.btnDlPdf;
+            document.getElementById('prev-title').innerText = ui.prevTitle;
+            document.getElementById('stp1-lbl').innerText = ui.stp1Lbl;
+            document.getElementById('stp2-lbl').innerText = ui.stp2Lbl;
+            document.getElementById('stp3-lbl').innerText = ui.stp3Lbl;
+            document.getElementById('stp4-lbl').innerText = ui.stp4Lbl;
+        }
+
+        update();
+    }
 
     function generateUID() {
         return Math.random().toString(36).substring(2, 9).toUpperCase();
@@ -412,6 +628,7 @@
         const configId = generateUID();
         const inputs = Array.from(document.querySelectorAll('.lot-row'));
         const configData = {
+            lang: document.getElementById('game_lang').value,
             n: inputs.map(i => i.querySelector('.ln').value),
             p: inputs.map(i => parseFloat(i.querySelector('.lp').value) || 0),
             s: inputs.map(i => parseInt(i.querySelector('.ls').value) || 12),
@@ -424,6 +641,15 @@
             t3: document.getElementById('t3').value, 
             tw: document.getElementById('t_wheel').value,
             tc: document.getElementById('t_cond').value,
+            t_qr_scan: document.getElementById('t_qr_scan').value,
+            t_last: document.getElementById('t_last_step').value,
+            t_name: document.getElementById('t_name').value,
+            t_email: document.getElementById('t_email').value,
+            t_phone: document.getElementById('t_phone').value,
+            t_btn_v: document.getElementById('t_btn_validate').value,
+            t_btn_s: document.getElementById('t_btn_spin').value,
+            t_thx: document.getElementById('t_thanks').value,
+            t_res: document.getElementById('t_res_label').value,
             b1: document.getElementById('color1').value,
             b2: document.getElementById('color2').value,
             wb_c: document.getElementById('wheel_border_color').value,
@@ -450,7 +676,8 @@
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, { text: url, width: 220, height: 220, colorDark: "#000000" });
-            btn.innerText = "QR Code prêt !";
+            const lang = document.getElementById('game_lang').value;
+            btn.innerText = (lang === 'fr' ? "QR Code prêt !" : "QR Code ready!");
             btn.disabled = false;
         } catch (e) {
             alert("Erreur d'enregistrement.");
@@ -546,6 +773,7 @@
         const bgOpacity = document.getElementById('bg_opacity').value;
         const textColor = document.getElementById('text_color').value;
         const buttonColor = document.getElementById('button_color').value;
+        const lang = document.getElementById('game_lang').value;
 
         document.getElementById('pre-logo-pop').src = logoUrl;
         document.getElementById('pre-logo-wheel').src = logoUrl;
@@ -554,11 +782,23 @@
         
         document.getElementById('pre-t1').innerText = document.getElementById('t1').value;
         document.getElementById('qr-title').innerText = document.getElementById('t1').value;
+        document.getElementById('qr-scan-text').innerText = document.getElementById('t_qr_scan').value;
         document.getElementById('pre-t2').innerText = document.getElementById('t2').value;
         document.getElementById('pre-t3').innerText = document.getElementById('t3').value;
         document.getElementById('pre-twheel').innerText = document.getElementById('t_wheel').value;
         document.getElementById('pre-cond').innerText = document.getElementById('t_cond').value;
         
+        document.getElementById('pre-t-last').innerText = document.getElementById('t_last_step').value;
+        document.getElementById('pre-ph-name').placeholder = document.getElementById('t_name').value;
+        document.getElementById('pre-ph-email').placeholder = document.getElementById('t_email').value;
+        document.getElementById('pre-ph-phone').placeholder = document.getElementById('t_phone').value;
+        document.getElementById('pre-btn-val').innerText = document.getElementById('t_btn_validate').value;
+        document.getElementById('pre-btn-spin').innerText = document.getElementById('t_btn_spin').value;
+        document.getElementById('pre-t-thanks').innerText = document.getElementById('t_thanks').value;
+        document.getElementById('pre-t-res').innerText = document.getElementById('t_res_label').value;
+        
+        if(translations[lang]) document.getElementById('pre-rgpd-text').innerText = translations[lang].rgpd;
+
         const root = document.documentElement;
         root.style.setProperty('--yellow-border', document.getElementById('wheel_border_color').value);
         root.style.setProperty('--bulb-color', document.getElementById('wheel_bulb_color').value);
@@ -583,10 +823,10 @@
         const txs = inputs.map(i => i.querySelector('.ltx').value);
 
         const total = ps.reduce((a, b) => a + b, 0);
-        let infoStr = `Sur 100 participants, environ : `;
+        let infoStr = lang === 'fr' ? `Sur 100 participants, environ : ` : `Approx per 100 participants : `;
         const details = ns.map((n, i) => {
-            const name = n.trim() || "Lot sans nom";
-            return `<strong>${Math.round(ps[i])}</strong> auront "${name}"`;
+            const name = n.trim() || "Lot";
+            return `<strong>${Math.round(ps[i])}</strong> -> "${name}"`;
         });
         document.getElementById('prob-info').innerHTML = infoStr + details.join(', ') + ".";
 
@@ -621,7 +861,7 @@
     }
 
     function spinPreview() {
-        const btn = document.getElementById('btn-spin-preview');
+        const btn = document.getElementById('pre-btn-spin');
         const canvas = document.getElementById('canvas-preview');
         const pointer = document.getElementById('pre-pointer');
         canvas.style.transform = `rotate(${3600 + Math.random()*360}deg)`;
@@ -660,10 +900,12 @@
         const btnCol = config.cust_btn_c || '#000000';
         const rgb = hexToRgb(bgCol);
         const rgbaColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${bgOp})`;
+        const lang = config.lang || 'fr';
+        const t = translations[lang] || translations.fr;
 
         document.body.innerHTML = `
         <style>
-            body { margin: 0; padding: 0; box-sizing: border-box; min-height: 100vh; background-color: ${bgCol}; background-image: ${bgImg ? `url('${bgImg}')` : 'none'}; background-size: cover; background-position: center; background-attachment: fixed; color: ${txCol}; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; font-family: 'Segoe UI', sans-serif; position: relative; overflow-x: hidden; }
+            body { margin: 0; padding: 0; box-sizing: border-box; min-height: 100vh; background-color: ${bgCol}; background-image: ${bgImg ? `url('${bgImg}')` : 'none'}; background-size: cover; background-position: center; background-attachment: fixed; color: ${txCol}; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; font-family: 'Segoe UI', sans-serif; position: relative; overflow-x: hidden; direction: ${lang === 'ar' ? 'rtl' : 'ltr'}; }
             body::after { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: ${rgbaColor}; z-index: 0; pointer-events: none; }
             .client-card { position: relative; z-index: 1; background: transparent; padding: 40px 20px; width: 100%; max-width: 450px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
             .btn-black-c { background: ${btnCol}; color: #fff; border: none; padding: 18px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; max-width: 320px; font-size: 16px; margin: 15px auto 0 auto; position: relative; z-index: 2; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; }
@@ -691,16 +933,16 @@
         </div>
         <div id="step-form" class="client-card" style="display:none;">
             <img src="${config.l}" style="max-width:100px; margin-bottom:25px; object-fit: contain;">
-            <h3>Dernière étape !</h3>
-            <p>Complétez vos infos pour lancer la roue.</p>
-            <input type="text" id="c_nom" placeholder="Votre nom complet" required>
-            <input type="email" id="c_email" placeholder="Votre email" required>
-            <input type="tel" id="c_tel" placeholder="Votre téléphone" required>
+            <h3>${config.t_last || t.last}</h3>
+            <p>${lang === 'fr' ? 'Complétez vos infos pour lancer la roue.' : 'Complete your info to spin the wheel.'}</p>
+            <input type="text" id="c_nom" placeholder="${config.t_name || t.name}" required>
+            <input type="email" id="c_email" placeholder="${config.t_email || t.email}" required>
+            <input type="tel" id="c_tel" placeholder="${config.t_phone || t.phone}" required>
             <label style="font-size: 12px; display: flex; gap: 10px; text-align: left; align-items: flex-start; margin-top: 15px; position: relative; z-index: 2; cursor: pointer;">
                 <input type="checkbox" id="c_rgpd" required style="margin-top:3px; width: 18px; height: 18px;"> 
-                <span>J'accepte que mes données soient collectées pour être recontacté si je gagne. J'accepte le règlement du jeu et l'utilisation de mes données pour ma participation. J'accepte également de recevoir des offres promotionnelles de l'établissement par email et téléphone.</span>
+                <span>${t.rgpd}</span>
             </label>
-            <button class="btn-black-c" onclick="validateForm()">VALIDER ET JOUER</button>
+            <button class="btn-black-c" onclick="validateForm()">${config.t_btn_v || t.val}</button>
         </div>
         <div id="step-wheel" class="client-card" style="display:none;">
             <h2 style="font-size: 1.3em; margin-bottom: 10px;">${config.tw}</h2> 
@@ -709,10 +951,10 @@
                 <img src="${config.l}" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:60px; height:60px; border-radius:50%; background:white; z-index:5; border:2px solid #fff; object-fit:contain;">
                 <canvas id="rc" width="300" height="300"></canvas>
             </div>
-            <button id="spin-btn" class="btn-black-c" onclick="spinClient()">LANCEZ LA ROUE</button>
+            <button id="spin-btn" class="btn-black-c" onclick="spinClient()">${config.t_btn_s || t.spin}</button>
             <div id="res-box" class="res-box" style="display:none;">
-                 <h3 style="margin: 0;">Résultat : </h3>
-                 <p style="font-size:26px; font-weight:bold; margin: 10px 0;"><span id="win-txt"></span></p>
+                 <h3 style="margin: 0;">${config.t_thx || t.thx}</h3>
+                 <p style="font-size:26px; font-weight:bold; margin: 10px 0;">${config.t_res || t.res} <span id="win-txt"></span></p>
                  <p style="font-size:11px; text-align:justify; border-top: 1px solid rgba(0,0,0,0.1); padding-top:15px; margin-bottom: 0;">${config.tc}</p>
             </div>
         </div>`;
@@ -740,7 +982,7 @@
         };
 
         window.validateForm = () => {
-            if(!document.getElementById('c_nom').value || !document.getElementById('c_email').value || !document.getElementById('c_rgpd').checked) return alert("Veuillez remplir les champs et accepter le règlement.");
+            if(!document.getElementById('c_nom').value || !document.getElementById('c_email').value || !document.getElementById('c_rgpd').checked) return alert("Validation error.");
             showStep('step-wheel');
         };
 
@@ -759,7 +1001,7 @@
                     headers: { 'Authorization': `Bearer ${SB_KEY}`, 'apikey': SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
                     body: JSON.stringify(participantData)
                 });
-            } catch (e) { console.error("Erreur de sauvegarde participant", e); }
+            } catch (e) { console.error("Error saving participant", e); }
         };
 
         window.spinClient = () => {
@@ -805,7 +1047,6 @@
     }
 
     window.onload = async () => {
-        // Logique de chargement de 1,5 secondes
         setTimeout(() => {
             const loader = document.getElementById('loader-wrapper');
             const content = document.getElementById('main-content');
